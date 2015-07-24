@@ -1,0 +1,278 @@
+#include <QtTest>
+
+#include <QString>
+
+#include "ReadableNumber.h"
+
+#define QTHROWS(CODE, EXCEPTION, MESSAGE) \
+    bool thrown = false; \
+    try { CODE; } \
+    catch(EXCEPTION) { thrown = true; } \
+    QVERIFY2(thrown, MESSAGE)
+
+class ReadableNumberTests : public QObject
+{
+    Q_OBJECT
+
+private Q_SLOTS:
+
+    void testNAN_set_setsTheString()
+    {
+        auto expected = QString("cabbage");
+        auto previous = ReadableNumber::NaN();
+
+        ReadableNumber::setNaN(expected);
+
+        QCOMPARE(ReadableNumber::NaN(), expected);
+
+        ReadableNumber::setNaN(previous);
+
+        QCOMPARE(ReadableNumber::NaN(), previous);
+    }
+
+    void testMakeReadable_integer_returnsCorrectString_data()
+    {
+        QTest::addColumn<long>("number");
+        QTest::addColumn<QString>("expected");
+
+#define ADD_INTEGER(N, TEXT) QTest::newRow((#N)) << N##l << (#TEXT)
+
+        ADD_INTEGER(0, ZERO);
+        ADD_INTEGER(1, ONE);
+        ADD_INTEGER(2, TWO);
+        ADD_INTEGER(3, THREE);
+        ADD_INTEGER(4, FOUR);
+        ADD_INTEGER(5, FIVE);
+        ADD_INTEGER(6, SIX);
+        ADD_INTEGER(7, SEVEN);
+        ADD_INTEGER(8, EIGHT);
+        ADD_INTEGER(9, NINE);
+        ADD_INTEGER(10, TEN);
+        ADD_INTEGER(11, ELEVEN);
+        ADD_INTEGER(12, TWELVE);
+        ADD_INTEGER(13, THIRTEEN);
+        ADD_INTEGER(14, FOURTEEN);
+        ADD_INTEGER(15, FIFTEEN);
+        ADD_INTEGER(16, SIXTEEN);
+        ADD_INTEGER(17, SEVENTEEN);
+        ADD_INTEGER(18, EIGHTEEN);
+        ADD_INTEGER(19, NINETEEN);
+
+        ADD_INTEGER(20, TWENTY);
+        ADD_INTEGER(30, THIRTY);
+        ADD_INTEGER(40, FOURTY);
+        ADD_INTEGER(50, FIFTY);
+        ADD_INTEGER(60, SIXTY);
+        ADD_INTEGER(70, SEVENTY);
+        ADD_INTEGER(80, EIGHTY);
+        ADD_INTEGER(90, NINETY);
+
+        ADD_INTEGER(21, TWENTY ONE);
+        ADD_INTEGER(22, TWENTY TWO);
+        ADD_INTEGER(33, THIRTY THREE);
+        ADD_INTEGER(42, FOURTY TWO);
+        ADD_INTEGER(57, FIFTY SEVEN);
+        ADD_INTEGER(68, SIXTY EIGHT);
+        ADD_INTEGER(73, SEVENTY THREE);
+        ADD_INTEGER(81, EIGHTY ONE);
+        ADD_INTEGER(99, NINETY NINE);
+
+        ADD_INTEGER(100, ONE HUNDRED);
+        ADD_INTEGER(200, TWO HUNDRED);
+        ADD_INTEGER(300, THREE HUNDRED);
+        ADD_INTEGER(400, FOUR HUNDRED);
+        ADD_INTEGER(500, FIVE HUNDRED);
+        ADD_INTEGER(600, SIX HUNDRED);
+        ADD_INTEGER(700, SEVEN HUNDRED);
+        ADD_INTEGER(800, EIGHT HUNDRED);
+        ADD_INTEGER(900, NINE HUNDRED);
+
+        ADD_INTEGER(101, ONE HUNDRED AND ONE);
+        ADD_INTEGER(102, ONE HUNDRED AND TWO);
+        ADD_INTEGER(203, TWO HUNDRED AND THREE);
+        ADD_INTEGER(327, THREE HUNDRED AND TWENTY SEVEN);
+        ADD_INTEGER(419, FOUR HUNDRED AND NINETEEN);
+        ADD_INTEGER(589, FIVE HUNDRED AND EIGHTY NINE);
+        ADD_INTEGER(698, SIX HUNDRED AND NINETY EIGHT);
+        ADD_INTEGER(777, SEVEN HUNDRED AND SEVENTY SEVEN);
+        ADD_INTEGER(811, EIGHT HUNDRED AND ELEVEN);
+        ADD_INTEGER(999, NINE HUNDRED AND NINETY NINE);
+
+        ADD_INTEGER(1000, ONE THOUSAND);
+        ADD_INTEGER(2000, TWO THOUSAND);
+        ADD_INTEGER(7000, SEVEN THOUSAND);
+        ADD_INTEGER(10000, TEN THOUSAND);
+        ADD_INTEGER(100000, ONE HUNDRED THOUSAND);
+        ADD_INTEGER(999000, NINE HUNDRED AND NINETY NINE THOUSAND);
+
+        ADD_INTEGER(1001, ONE THOUSAND AND ONE);
+        ADD_INTEGER(1002, ONE THOUSAND AND TWO);
+        ADD_INTEGER(2001, TWO THOUSAND AND ONE);
+        ADD_INTEGER(2037, TWO THOUSAND AND THIRTY SEVEN);
+
+        ADD_INTEGER(1100, ONE THOUSAND ONE HUNDRED);
+        ADD_INTEGER(1101, ONE THOUSAND ONE HUNDRED AND ONE);
+        ADD_INTEGER(1729, ONE THOUSAND SEVEN HUNDRED AND TWENTY NINE);
+        ADD_INTEGER(999999, NINE HUNDRED AND NINETY NINE THOUSAND NINE HUNDRED AND NINETY NINE);
+
+        ADD_INTEGER(1000000, ONE MILLION);
+        ADD_INTEGER(1000100, ONE MILLION ONE HUNDRED);
+        ADD_INTEGER(1002000, ONE MILLION TWO THOUSAND);
+        ADD_INTEGER(1030000, ONE MILLION THIRTY THOUSAND);
+        ADD_INTEGER(1400100, ONE MILLION FOUR HUNDRED THOUSAND ONE HUNDRED);
+        ADD_INTEGER(2345678, TWO MILLION THREE HUNDRED AND FOURTY FIVE THOUSAND SIX HUNDRED AND SEVENTY EIGHT);
+
+        ADD_INTEGER(10000000, TEN MILLION);
+        ADD_INTEGER(200000000, TWO HUNDRED MILLION);
+        ADD_INTEGER(3000000000, THREE THOUSAND MILLION);
+        ADD_INTEGER(40000000000, FOURTY THOUSAND MILLION);
+        ADD_INTEGER(500000000000, FIVE HUNDRED THOUSAND MILLION);
+        ADD_INTEGER(999999999999, NINE HUNDRED AND NINETY NINE THOUSAND NINE HUNDRED AND NINETY NINE MILLION NINE HUNDRED AND NINETY NINE THOUSAND NINE HUNDRED AND NINETY NINE);
+        ADD_INTEGER(1000000000000, ONE BILLION);
+
+        ADD_INTEGER(-1, MINUS ONE);
+        ADD_INTEGER(-10, MINUS TEN);
+        ADD_INTEGER(-100, MINUS ONE HUNDRED);
+        ADD_INTEGER(-1000, MINUS ONE THOUSAND);
+        ADD_INTEGER(-10000, MINUS TEN THOUSAND);
+        ADD_INTEGER(-100000, MINUS ONE HUNDRED THOUSAND);
+        ADD_INTEGER(-1000000, MINUS ONE MILLION);
+        ADD_INTEGER(-1000000000, MINUS ONE THOUSAND MILLION);
+        ADD_INTEGER(-1000000000000, MINUS ONE BILLION);
+    }
+
+    void testMakeReadable_integer_returnsCorrectString()
+    {
+        ReadableNumber maker;
+
+        QFETCH(long, number);
+        QFETCH(QString, expected);
+
+        QCOMPARE(maker.makeReadable(number), expected);
+    }
+
+    void testMakeReadable_double_returnsCorrectString_data()
+    {
+        QTest::addColumn<double>("number");
+        QTest::addColumn<int>("decimals");
+        QTest::addColumn<QString>("expected");
+
+#define ADD_DOUBLE(D, DEC, TEXT) QTest::newRow((#D)) << (D) << (DEC) << (#TEXT)
+
+        ADD_DOUBLE(0.0, 1, ZERO POINT ZERO);
+        ADD_DOUBLE(0.0, 2, ZERO POINT ZERO ZERO);
+        ADD_DOUBLE(0.0, 3, ZERO POINT ZERO ZERO ZERO);
+        ADD_DOUBLE(0.0, 4, ZERO POINT ZERO ZERO ZERO ZERO);
+        ADD_DOUBLE(0.0, 5, ZERO POINT ZERO ZERO ZERO ZERO ZERO);
+
+        ADD_DOUBLE(0.1, 1, ZERO POINT ONE);
+        ADD_DOUBLE(0.12, 2, ZERO POINT ONE TWO);
+        ADD_DOUBLE(0.123, 3, ZERO POINT ONE TWO THREE);
+        ADD_DOUBLE(0.1234, 4, ZERO POINT ONE TWO THREE FOUR);
+        ADD_DOUBLE(0.12345, 5, ZERO POINT ONE TWO THREE FOUR FIVE);
+
+        ADD_DOUBLE(3.1415926535, 10, THREE POINT ONE FOUR ONE FIVE NINE TWO SIX FIVE THREE FIVE);
+        ADD_DOUBLE(3.14159265358, 11, THREE POINT ONE FOUR ONE FIVE NINE TWO SIX FIVE THREE FIVE EIGHT);
+        ADD_DOUBLE(3.141592653589, 12, THREE POINT ONE FOUR ONE FIVE NINE TWO SIX FIVE THREE FIVE EIGHT EIGHT);
+        ADD_DOUBLE(3.1415926535897, 13, THREE POINT ONE FOUR ONE FIVE NINE TWO SIX FIVE THREE FIVE EIGHT NINE SIX);
+        ADD_DOUBLE(3.14159265358979, 14, THREE POINT ONE FOUR ONE FIVE NINE TWO SIX FIVE THREE FIVE EIGHT NINE SEVEN NINE);
+        ADD_DOUBLE(3.141592653589793, 15, THREE POINT ONE FOUR ONE FIVE NINE TWO SIX FIVE THREE FIVE EIGHT NINE SEVEN NINE THREE);
+
+        ADD_DOUBLE(-1.1, 5, MINUS ONE POINT ONE ZERO ZERO ZERO ZERO);
+        ADD_DOUBLE(-273.15, 5, MINUS TWO HUNDRED AND SEVENTY THREE POINT ONE FOUR NINE NINE NINE);
+        ADD_DOUBLE(-3.141592653589793, 15, MINUS THREE POINT ONE FOUR ONE FIVE NINE TWO SIX FIVE THREE FIVE EIGHT NINE SEVEN NINE THREE);
+
+        ADD_DOUBLE(1000000000000.9, 1, ONE BILLION POINT NINE);
+        ADD_DOUBLE(-1000000000000.9, 1, MINUS ONE BILLION POINT NINE);
+    }
+
+    void testMakeReadable_double_returnsCorrectString()
+    {
+        ReadableNumber maker;
+
+        QFETCH(double, number);
+        QFETCH(int, decimals);
+        QFETCH(QString, expected);
+
+        QCOMPARE(maker.makeReadable(number, decimals), expected);
+    }
+
+    void testMakeReadable_string_returnsCorrectString_data()
+    {
+        QTest::addColumn<QString>("number");
+        QTest::addColumn<QString>("expected");
+
+#define ADD_STRING(N, TEXT) QTest::newRow((N)) << N << (#TEXT)
+
+        ADD_STRING("0", ZERO);
+        ADD_STRING("1", ONE);
+
+        ADD_STRING("-1", MINUS ONE);
+
+        ADD_STRING("0.0", ZERO POINT ZERO);
+        ADD_STRING("0.1", ZERO POINT ONE);
+
+        ADD_STRING("3.14", THREE POINT ONE FOUR);
+        ADD_STRING("3.141592653589", THREE POINT ONE FOUR ONE FIVE NINE TWO SIX FIVE THREE FIVE EIGHT NINE);
+        ADD_STRING("-3.141592653589793", MINUS THREE POINT ONE FOUR ONE FIVE NINE TWO SIX FIVE THREE FIVE EIGHT NINE SEVEN NINE THREE);
+
+        ADD_STRING("-273.15", MINUS TWO HUNDRED AND SEVENTY THREE POINT ONE FIVE);
+
+        ADD_STRING("+0.", ZERO);
+        ADD_STRING("+1.", ONE);
+
+        ADD_STRING("0.", ZERO);
+        ADD_STRING("1.", ONE);
+        ADD_STRING("a", NOT A NUMBER);
+        ADD_STRING("0a", NOT A NUMBER);
+        ADD_STRING("1a", NOT A NUMBER);
+        ADD_STRING("0.a", NOT A NUMBER);
+        ADD_STRING("0.1a", NOT A NUMBER);
+
+        ADD_STRING("-0.", ZERO);
+        ADD_STRING("-1.", MINUS ONE);
+        ADD_STRING("-a", NOT A NUMBER);
+        ADD_STRING("-0a", NOT A NUMBER);
+        ADD_STRING("-1a", NOT A NUMBER);
+        ADD_STRING("-0.a", NOT A NUMBER);
+        ADD_STRING("-0.1a", NOT A NUMBER);
+
+        ADD_STRING("1000000000000.9999999999", ONE BILLION POINT NINE NINE NINE NINE NINE NINE NINE NINE NINE NINE);
+        ADD_STRING("-1000000000000.9999999999", MINUS ONE BILLION POINT NINE NINE NINE NINE NINE NINE NINE NINE NINE NINE);
+    }
+
+    void testMakeReadable_string_returnsCorrectString()
+    {
+        ReadableNumber maker;
+
+        QFETCH(QString, number);
+        QFETCH(QString, expected);
+
+        QCOMPARE(maker.makeReadable(number.toStdString().c_str()), expected);
+    }
+
+    void testMakeReadable_integerTooLarge_throws()
+    {
+        ReadableNumber maker;
+
+        QTHROWS(maker.makeReadable(1000000000001), std::runtime_error, "Did not throw");
+    }
+
+    void testMakeReadable_doubleTooLarge_throws()
+    {
+        ReadableNumber maker;
+
+        QTHROWS(maker.makeReadable(1000000000001.0), std::runtime_error, "Did not throw");
+    }
+
+    void testMakeReadable_stringTooLarge_throws()
+    {
+        ReadableNumber maker;
+
+        QTHROWS(maker.makeReadable("1000000000001"), std::runtime_error, "Did not throw");
+    }
+};
+
+QTEST_APPLESS_MAIN(ReadableNumberTests)
+
+#include "ReadableNumberTests.moc"
